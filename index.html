@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tensor Flow Practice</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script> -->
+    <script>
+
+        //método general
+        // parametros: array, dimension(ejemplo: [2, 2]), tipo de datos(ejemplo: "int32")
+        // const intTensor = tf.tensor([1, 2, 3, 4], [2, 2], "int32")
+        // intTensor.print()
+        // console.log(intTensor)
+
+        //método por dimensión, 2 dimensiones en este caso 
+        // const stringTensor = tf.tensor2d([["hola", "mundo"], ["hello", "world"]])
+        // stringTensor.print()
+        // console.log(stringTensor)
+
+        const linealFunction = async() =>{
+            //F(x) = 2.x-1
+            //modelo secuencial
+            const model = tf.sequential()
+            //se agrega una capa
+            model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+
+            model.compile({
+                loss: "meanSquaredError",
+                optimizer: "sgd"
+            })
+
+            //valores de x e y
+            const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4], [6, 1])
+            const ys = tf.tensor2d([-3, -1, 1, 3, 5, 7], [6, 1])
+
+            await model.fit(xs, ys, {epochs: 500})
+
+            console.log(model.predict(tf.tensor([9], [1, 1])).print())
+        }
+
+        // linealFunction()
+
+        const celsiusToFahrenheit = async () =>{
+            //(x.9/5)+32
+            const model = tf.sequential()
+
+            model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+
+            model.compile({
+                loss: "meanSquaredError",
+                optimizer: "sgd"
+            })
+
+            //valores de x e y
+            const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4], [6, 1])
+            const ys = tf.tensor2d([30.2, 32, 33.8, 35.6, 37.4, 39.2], [6, 1])
+
+            await model.fit(xs, ys, {epochs: 1000})
+
+            model.predict(tf.tensor([38], [1, 1])).print()
+            // console.log(model.predict(tf.tensor([38], [1, 1])).print())
+        }
+
+        // celsiusToFahrenheit()
+
+        const createModel = async (x, y, epochs) =>{
+
+            const model = tf.sequential()
+
+            model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+
+            model.compile({
+                loss: "meanSquaredError",
+                optimizer: "sgd"
+            })
+
+            //valores de x e y
+            const xs = tf.tensor2d(x, [x.length, 1])
+            const ys = tf.tensor2d(y, [y.length, 1])
+
+            await model.fit(xs, ys, {epochs: epochs})
+            return model
+        }
+
+        const fcModel = createModel([-1, 0, 1, 2, 3, 4], [30.2, 32, 33.8, 35.6, 37.4, 39.2], 1000)
+        
+        const convertFahrenheit = (celsius, model) =>{
+            const usedModel = model
+
+            usedModel.predict(tf.tensor([celsius], [1, 1])).print()
+        }
+
+        setTimeout(()=>{
+            let button = document.createElement('button')
+            button.innerHTML = "Calcular"
+            button.id = "calcular"
+
+            document.body.append(button)
+
+            document.getElementById("calcular").addEventListener("click", ()=>convertFahrenheit(38, fcModel))
+        }, 10000)
+        
+
+    </script>
+</body>
+</html>
