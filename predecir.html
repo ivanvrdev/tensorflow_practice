@@ -41,13 +41,15 @@
                     e.preventDefault()
 
                     const input = e.target.input_number.value
-                    document.getElementById("predict").innerHTML = model.predict(tf.tensor([parseInt(input)], [1, 1]))
+                    const predict = model.predict(tf.tensor([parseInt(input)], [1, 1])).dataSync()
+                    document.getElementById("predict").innerHTML = predict
                 })
             })
         }
 
         createModel()
-        
+
+        //Vazquez Ramirez Iván Gastón 13-04-2022
     </script>
 </body>
 </html>
