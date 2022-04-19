@@ -5,18 +5,100 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preguntas y Respuestas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
 <body>
+    <div class="container">
+        <h1 class="text-center fw-bold">Preguntas y respuestas</h1>
+        <form action="#">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-floating my-1">
+                        <textarea class="form-control" name="passage" id="passage" cols="30" rows="10"></textarea>
+                        <label for="passage">Enunciado</label>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-floating my-1">
+                        <textarea class="form-control" name="question" id="question" cols="30" rows="10"></textarea>
+                        <label for="question">Pregunta</label>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid my-2">
+                <button class="btn btn-secondary" type="submit">Responder</button>
+            </div>
+        </form>
+    </div>
+    <div class="container my-2" id="response"></div>
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <!-- Tensorflow -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/qna"> </script>
     <script>
-        qna.load().then(model => {
-            const passage = "Google LLC is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, search engine, cloud computing, software, and hardware. It is considered one of the Big Four technology companies, alongside Amazon, Apple, and Facebook. Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002. An initial public offering (IPO) took place on August 19, 2004, and Google moved to its headquarters in Mountain View, California, nicknamed the Googleplex. In August 2015, Google announced plans to reorganize its various interests as a conglomerate called Alphabet Inc. Google is Alphabet's leading subsidiary and will continue to be the umbrella company for Alphabet's Internet interests. Sundar Pichai was appointed CEO of Google, replacing Larry Page who became the CEO of Alphabet."
-            const question = "Who was the CEO of Google before Pichai?"
-            // const passage = "My teammate's name is Hector"
-            // const question = "What's is my teammate name?"
-            model.findAnswers(question, passage).then(answers => console.log(answers));
+        // qna.load().then(model => {
+        //     const passage = "Google LLC is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, search engine, cloud computing, software, and hardware. It is considered one of the Big Four technology companies, alongside Amazon, Apple, and Facebook. Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002. An initial public offering (IPO) took place on August 19, 2004, and Google moved to its headquarters in Mountain View, California, nicknamed the Googleplex. In August 2015, Google announced plans to reorganize its various interests as a conglomerate called Alphabet Inc. Google is Alphabet's leading subsidiary and will continue to be the umbrella company for Alphabet's Internet interests. Sundar Pichai was appointed CEO of Google, replacing Larry Page who became the CEO of Alphabet."
+        //     const question = "Who was the CEO of Google before Pichai?"
+        //     // const passage = "My teammate's name is Hector"
+        //     // const question = "What's is my teammate name?"
+        //     model.findAnswers(question, passage).then(answers => console.log(answers));
+        // })
+
+        //question and answer function
+        const answer = async(passage, question) =>{
+            //cargamos el modelo
+            const model = await qna.load()
+            //pasamos el enunciado y la pregunta
+            const answers = await model.findAnswers(question, passage)
+            //retornamos una lista con las posibles respuestas
+            return answers
+        }
+
+        const showResponse = (response) =>{
+            const div = document.getElementById("response")
+            const h2 = document.createElement("h2")
+            if(response.length > 0){
+                const ol = document.createElement('ol')
+                ol.className = "list-group list-group-numbered"
+    
+                ol.innerHTML = response.map(item => 
+                    `<li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">"${item.text}"</div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">score: ${item.score.toFixed(2)}</span>
+                    </li>`
+                )
+                h2.innerHTML="Respuestas"
+                div.append(ol)
+            }else{
+                h2.innerHTML="Sin coincidencias"
+            }
+            div.prepend(h2)
+        }
+
+        const form = document.forms[0]
+
+        form.addEventListener("submit", e=>{
+            e.preventDefault()
+
+            const div = document.getElementById("response")
+            div.innerHTML = `
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            `
+
+            const { passage, question } = e.target
+
+            answer(passage.value, question.value)
+            .then(answer => {
+                div.innerHTML = ""
+                showResponse(answer)
+            })
         })
+
     </script>
 </body>
 </html>
