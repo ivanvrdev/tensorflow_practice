@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detección en tiempo real</title>
+    <style>
+        video{
+            display: block;
+        }
+        .removed{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <section id="demos" class="invisible">
+        <div id="liveView" class="camView">
+            <button id="webcamButton">Activar Cámara</button>
+            <video id="webcam" autoplay muted width="640" height="480"></video>
+        </div>
+    </section>
+
+    <!-- Tensorflow -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <!-- CocoSsd -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+    <script>
+        const model = true
+        const video = document.getElementById('webcam')
+        const liveView = document.getElementById('liveView')
+        const demosSection = document.getElementById('demos')
+        const enableWebcamButton = document.getElementById('webcamButton')
+
+        const predictWebcam = () =>{
+
+        }
+        //verificación de acceso a webcam
+        const getUserMediaSupported = ()=> {
+            return (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+        }
+        //evento para habilitar webacam
+        const enableCam = (evento) =>{
+            if(!model) return
+            //ocultar el botón
+            event.target.classList.add("removed")
+            //obtener video sin audio
+            const constraints = {
+                video: true
+            }
+            //proyectar el video
+            navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+                video.srcObject = stream;
+                video.addEventListener('loadeddata', predictWebcam);
+            })
+        }
+        //listener
+        if (getUserMediaSupported()) {
+            enableWebcamButton.addEventListener('click', enableCam)
+        } else {
+            console.warn('getUserMedia() no es soportado por tu navegador')
+        }
+    </script>
+</body>
+</html>
