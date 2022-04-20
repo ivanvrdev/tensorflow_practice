@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconocimiento de Imagen</title>
+    <style>
+        body {
+            margin:0px;
+            height:100vh;
+            background: #1283da;
+        }
+        .center {
+            height:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .form-input {
+            width:350px;
+            padding:20px;
+            background:#fff;
+            box-shadow: -3px -3px 7px rgba(94, 104, 121, 0.377), 3px 3px 7px rgba(94, 104, 121, 0.377);
+        }
+        .form-input img {
+            width:100%;
+            display:none;
+            margin-bottom:30px;
+        }
+        .form-input input {
+            display:none;   
+        }
+        .form-input button {
+            display: none;
+        }
+        .form-input label {
+            display:block;
+            width:45%;
+            height:45px;
+            margin-left: 25%;
+            line-height:50px;
+            text-align:center;
+            background:#1172c2;
+            color:#fff;
+            font-size:15px;
+            font-family:"Open Sans",sans-serif;
+            text-transform:Uppercase;
+            font-weight:600;
+            border-radius:5px;
+            cursor:pointer;
+        }
+        .form-input button {
+            display: none;
+            background-color: #1172c2;
+            width:45%;
+            height:45px;
+            margin-left: 25%;
+            line-height:50px;
+            text-align:center;
+            color:#fff;
+            font-size:15px;
+            font-family:"Open Sans",sans-serif;
+            text-transform:Uppercase;
+            font-weight:600;
+            border-radius:5px;
+            cursor:pointer;
+            border: none;
+            margin-top: 10px;
+        }
+        .form-input p{
+            display: none;
+            text-align: center;
+            font-size: 20px;
+            font-family:"Open Sans",sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="center">
+        <div class="form-input">
+            <div class="preview">
+                <img src="" alt="" id="img_tag">
+            </div>
+            <form action="#">
+                <label for="file_input">Subir Imagen</label>
+                <input type="file" name="file_input" id="file_input" accept="image/png, image/jpeg">
+                <button type="submit" id="submit_button">Analizar</button>
+            </form>
+            <p id="prediction">Predicción</p>
+        </div>
+    </div>
+
+    <!-- Tensorflow -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <!-- Cocossd -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+    <script>
+
+        const form = document.forms[0]
+        const fileInput = document.getElementById("file_input")
+        const imgTag = document.getElementById("img_tag")
+        const submitBtn = document.getElementById("submit_button")
+        const predictionTag = document.getElementById("prediction")
+
+        const analyzeImg = async (image)=>{
+            const model = await cocoSsd.load()
+            const prediction = await model.detect(image)
+            return prediction
+        }
+
+        fileInput.addEventListener("change", e => {
+            if(e.target.files.length > 0){
+                imgTag.src = URL.createObjectURL(e.target.files[0])
+                imgTag.style.display = "block"
+                submitBtn.style.display = "block"
+                predictionTag.style.display = "none"
+                predictionTag.innerHTML = ""
+            }
+        })
+
+        form.addEventListener("submit", e=>{
+            e.preventDefault()
+            predictionTag.innerHTML = `Analizando...`
+            predictionTag.style.display = "block"
+            analyzeImg(imgTag).then(prediction => {
+                predictionTag.innerHTML = `Predicción: "${prediction[0].class}"`
+            })
+        })
+
+
+    </script>
+</body>
+</html>
