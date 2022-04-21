@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelo reutilizable</title>
+</head>
+<style>
+    body{
+        font-family: sans-serif;
+    }
+    h1{
+        text-align: center;
+    }
+    p{
+        text-align: center;
+    }
+    form{
+        text-align: center;
+    }
+    .removed{
+        display: none;
+    }
+</style>
+<body>
+    <div id="loader">
+        <p>Entrenando...</p>
+    </div>
+    <div id="interface" class="removed">
+        <h1>Modelo reutilizable</h1>
+        <p>El siguiente modelo trata de predecir el resultado para f(x) = 3x+2</p>
+        <form action="" method="post">
+            <label for="input_number">Valores de entrada</label>
+            <input type="number" name="input_number">
+            <button type="submit">Precedir</button>
+        </form>
+        <p id="message"></p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+
+        const createModel = () =>{
+            //modelo secuencial
+            const model = tf.sequential()
+            //se agrega una capa
+            model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+
+            model.compile({
+                loss: "meanSquaredError",
+                optimizer: "sgd"
+            })
+
+            //valores de x e y
+            const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4, 5, 6, 7, 8], [10, 1])
+            const ys = tf.tensor2d([-1, 2, 5, 8, 11, 14, 17, 20, 23, 26], [10, 1])
+
+            model.fit(xs, ys, {epochs: 500}).then(()=>{
+                const form = document.forms[0]
+                const loader = document.getElementById('loader')
+                const interface = document.getElementById("interface")
+                const message = document.getElementById("message")
+
+                loader.classList.add("removed")
+                interface.classList.remove("removed")
+
+                form.addEventListener("submit", e=>{
+                    e.preventDefault()
+
+                    const input = e.target.input_number.value
+                    const predict = model.predict(tf.tensor([parseInt(input)], [1, 1])).dataSync()
+                    message.innerHTML = `Predicción: ${parseFloat(predict).toFixed(2)}`
+                })
+            })
+        }
+
+        createModel()
+
+        //Vazquez Ramirez Iván Gastón 13-04-2022
+    </script>
+</body>
+</html>
