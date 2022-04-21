@@ -18,6 +18,23 @@
             z-index: 1;
             position: absolute;
         }
+        .camView {
+            position: relative;
+            float: left;
+            width: calc(100% - 20px);
+            margin: 10px;
+            cursor: pointer;
+            }
+
+        .camView p {
+            position: absolute;
+            padding: 5px;
+            background-color: rgba(255, 111, 0, 0.85);
+            color: #FFF;
+            border: 1px dashed rgba(255, 255, 255, 0.7);
+            z-index: 2;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -40,6 +57,7 @@
         const demosSection = document.getElementById('demos')
         const enableWebcamButton = document.getElementById('webcamButton')
         const loader = document.getElementById("loader")
+        //almacenar los recudros para usarlos como referencia para removerlos después
         let children = []
 
         cocoSsd.load().then(loadedModel => {
@@ -49,19 +67,24 @@
         })
 
         const predictWebcam = () =>{
+            //clasificación por frame
             model.detect(video).then(predictions => {
+                //elimina los recuadores del div
                 children.forEach(item => liveView.removeChild(item))
+                //limpia el arreglo
                 children.splice(0)
 
                 predictions.forEach(item => {
+                    //si la predicción posee más de un 66% de coincidencia...
                     if(item.score > 0.66){
+                        //crea el texto con la predicción
                         const p = document.createElement("p")
                         p.innerText = item.class + " - with " 
                         + Math.round(parseFloat(item.score) * 100) + '% confidence.'
                         p.style = 'margin-left: ' + item.bbox[0] + 'px; margin-top: '
                         + (item.bbox[1] - 10) + 'px; width: ' 
                         + (item.bbox[2] - 10) + 'px; top: 0; left: 0;'
-
+                        //crea el recuadro
                         const highlighter = document.createElement('div');
                         highlighter.setAttribute('class', 'highlighter');
                         highlighter.style = 'left: ' + item.bbox[0] + 'px; top: '
@@ -75,7 +98,7 @@
                         children.push(p);
                     }
                 })
-
+                //llama a la función cuando el navegador este listo
                 window.requestAnimationFrame(predictWebcam)
             })
         }
