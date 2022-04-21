@@ -12,10 +12,17 @@
         .removed{
             display: none;
         }
+        .highlighter {
+            background: rgba(0, 255, 0, 0.25);
+            border: 1px dashed #fff;
+            z-index: 1;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
-    <section id="demos" class="invisible">
+    <div id="loader">Cargando modelo...</div>
+    <section id="demos" class="removed">
         <div id="liveView" class="camView">
             <button id="webcamButton">Activar Cámara</button>
             <video id="webcam" autoplay muted width="640" height="480"></video>
@@ -27,14 +34,50 @@
     <!-- CocoSsd -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
     <script>
-        const model = true
+        let model = undefined
         const video = document.getElementById('webcam')
         const liveView = document.getElementById('liveView')
         const demosSection = document.getElementById('demos')
         const enableWebcamButton = document.getElementById('webcamButton')
+        const loader = document.getElementById("loader")
+        let children = []
+
+        cocoSsd.load().then(loadedModel => {
+            model = loadedModel
+            demosSection.classList.remove("removed")
+            loader.classList.add("removed")
+        })
 
         const predictWebcam = () =>{
+            model.detect(video).then(predictions => {
+                children.forEach(item => liveView.removeChild(item))
+                children.splice(0)
 
+                predictions.forEach(item => {
+                    if(item.score > 0.66){
+                        const p = document.createElement("p")
+                        p.innerText = item.class + " - with " 
+                        + Math.round(parseFloat(item.score) * 100) + '% confidence.'
+                        p.style = 'margin-left: ' + item.bbox[0] + 'px; margin-top: '
+                        + (item.bbox[1] - 10) + 'px; width: ' 
+                        + (item.bbox[2] - 10) + 'px; top: 0; left: 0;'
+
+                        const highlighter = document.createElement('div');
+                        highlighter.setAttribute('class', 'highlighter');
+                        highlighter.style = 'left: ' + item.bbox[0] + 'px; top: '
+                        + item.bbox[1] + 'px; width: ' 
+                        + item.bbox[2] + 'px; height: '
+                        + item.bbox[3] + 'px;';
+
+                        liveView.appendChild(highlighter);
+                        liveView.appendChild(p);
+                        children.push(highlighter);
+                        children.push(p);
+                    }
+                })
+
+                window.requestAnimationFrame(predictWebcam)
+            })
         }
         //verificación de acceso a webcam
         const getUserMediaSupported = ()=> {
