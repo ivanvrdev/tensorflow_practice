@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelo lineal</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+    
+        const model = tf.sequential()
+
+        model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+
+        model.compile({
+            loss: "meanSquaredError",
+            optimizer: "sgd"
+        })
+
+        const x_examples = tf.tensor2d([1, 3, 5], [3, 1])
+        const y_examples = tf.tensor2d([2, 6, 10], [3, 1])
+
+        model.fit(x_examples, y_examples, {epochs: 500}).then(() => {
+            const x_values = tf.tensor2d([2, 4, 6], [3, 1])
+
+            const predicts = model.predict(x_values).dataSync()
+
+            const y_values = predicts.map(value => Math.round(value));
+
+            console.log(y_values)
+
+        })
+
+    </script>
+</body>
+</html>
