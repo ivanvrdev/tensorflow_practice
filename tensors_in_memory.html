@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidy test</title>
+</head>
+<body>
+    <h1>Inspeccionar la consola...</h1>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+
+        const tensorsData = () =>{
+            console.log("Cantidad: ", tf.memory().numTensors)
+            console.log("Memoria usada: ", tf.memory().numBytes)
+        }
+
+        let a, b, c, d, e, f, g, h
+
+        console.log("--creación de tensores a, b, c, d fuera de 'tidy'--")
+
+        a = tf.tensor([1, 2, 3])
+        b = tf.tensor([1, 2, 3])
+        c = tf.tensor([1, 2, 3])
+        d = tf.tensor([1, 2, 3])
+
+        tensorsData()
+    
+        const tidy_ev = tf.tidy(()=>{
+            
+            e = tf.tensor([1, 2, 3])
+            f = tf.tensor([1, 2, 3])
+            g = tf.tensor([1, 2, 3])
+            h = tf.tensor([1, 2, 3])
+            
+            console.log("--creación de tensores e, f, g, h dentro de 'tidy'--")
+            tensorsData()
+
+            console.log("--Tensor e guardado--")
+            tf.keep(e)
+
+            console.log("--return tensor f")
+            return f
+        })
+        
+        // tidy_ev.print()
+        // f.print()
+
+        console.log("--Tensores después de 'tidy'--")
+        tensorsData()
+
+        console.log("--Tensor a elimiando con 'dispose'--")
+        a.dispose()
+        tensorsData()
+
+        console.log("--Eliminación de todos los tensores restantes--")
+        b.dispose()
+        c.dispose()
+        d.dispose()
+        e.dispose()
+        f.dispose()
+        tensorsData()
+
+        //Vazquez Ramirez Iván Gastón 27-04-2022
+    </script>
+</body>
+</html>
