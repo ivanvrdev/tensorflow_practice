@@ -6,15 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modelo lineal</title>
 </head>
+<style>
+    *{
+        font-family: sans-serif;
+    }
+    .removed{
+        display: none;
+    }
+</style>
 <body>
-    <section id="predict_graphic">
-        <h1>Gráfico</h1>
+    <section id="loader_section">
+        <p>Cargando...</p>
+    </section>
+    <section id="form_section" class="removed">
+        <h1>Modelo Lineal</h1>
+        <p>Ingrese los valores de x separados por espacio, coma, guión, etc...</p>
+        <form action="#">
+            <label for="x_values_input">Valores de x</label>
+            <textarea name="x_values_input" id="x_values_input" cols="30" rows="10"></textarea>
+            <button type="submit">Predecir</button>
+        </form>
+    </section>
+    <section id="graphic_section" class="removed">
+        <h2>Gráfico</h2>
         <canvas id="graphic"></canvas>
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.js"></script>
     <script>
+        //html tags
+        const loader_section = document.getElementById("loader_section")
+        const form_section = document.getElementById("form_section")
+        const graphic_section = document.getElementById("graphic_section")
+
         //Aprendizaje automático
         const model = tf.sequential()
 
@@ -28,21 +53,88 @@
         const x_examples = tf.tensor2d([1, 3, 5], [3, 1])
         const y_examples = tf.tensor2d([2, 6, 10], [3, 1])
 
-        model.fit(x_examples, y_examples, {epochs: 500}).then(() => {
-            const x_values = tf.tensor2d([2, 4, 6], [3, 1])
+        model.fit(x_examples, y_examples, {epochs: 500})
+        .then(() => {
+            loader_section.classList.add("removed")
+            form_section.classList.remove("removed")
+            // const x_values = [2, 0, 4, 6]
+            // createGraphic(x_values, y_values)
+        })
+        
+        const predict = async (x_values) => {
+            const x_tensor = tf.tensor2d(x_values, [x_values.length, 1])
 
-            const predicts = model.predict(x_values).dataSync()
+            const predicts = await model.predict(x_tensor).dataSync()
 
             const y_values = predicts.map(value => Math.round(value));
 
-            console.log(y_values)
-        })
+            return y_values
+        }
 
         //Gráfico
         const createGraphic = (x_values, y_values) => {
-            const graphic = document.querySelector("#graphic") 
+            const graphic = document.querySelector("#graphic")
+
+            // console.log(x_values)
+            // console.log(y_values)
+
+            const predictions = {
+                label: "Predicciones",
+                data: x_values.includes(0) ? y_values : [0, ...y_values],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }
+
+            new Chart(graphic, {
+                type: 'line',// Tipo de gráfica
+                data: {
+                    labels: x_values.includes(0) ? x_values : [0, ...x_values],
+                    datasets: [
+                        predictions,
+                        // Aquí más datos...
+                    ]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }],
+                    },
+                }
+            });
         }
+        
+        //formulario
+        const form = document.forms[0]
+
+        form.addEventListener("submit", e => {
+            e.preventDefault()
+            const x_values_input = e.target.x_values_input.value
+
+            const re = /\b[0-9]+\b/ig
+
+            const x_values_str = x_values_input.match(re)
+            
+            if(!x_values_str.length > 0){
+                console.log("Debe ingresar valores...")
+                return
+            }
+
+            const x_values_int = x_values_str.map(value => parseInt(value))
+
+            predict(x_values_int)
+            .then(y_values => {
+                graphic_section.classList.remove("removed")
+                createGraphic(x_values_int, y_values)
+            })
+        })
+        
         //regex para gráfico => /\b[0-9]+\b/ig
+
+        //Vazquez Ramirez Iván Gastón 27-04-2022
     </script>
 </body>
 </html>
