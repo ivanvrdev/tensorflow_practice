@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagen a tensor</title>
+</head>
+<style>
+    .removed{
+        display: none;
+    }
+</style>
+<body>
+    <form action="#" id="upload_image">
+        <label for="image_input">Subir imagen</label>
+        <input type="file" name="image_input" id="image_input">
+        <button type="submit">Crear tensor</button>
+    </form>
+    <div id="options_div" class="removed">
+        <button>Girar</button>
+        <button>Voltear</button>
+        <button>Achicar</button>
+        <button>Agrandar</button>
+    </div>
+
+    <img src="" alt="" id="image_tag">
+    <canvas id="canvas_tag"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        
+        const form = document.forms[0]
+        const input = form.elements[0]
+        const image_tag = document.getElementById("image_tag")
+        const canvas_tag = document.getElementById("canvas_tag")
+        const options_div = document.getElementById("options_div")
+        let tensor = undefined
+        
+
+        const tensorsData = () =>{
+            console.log("Cantidad de tensores: ", tf.memory().numTensors)
+            console.log("Memoria usada: ", tf.memory().numBytes, " Bytes")
+        }
+
+        input.addEventListener("change", e=>{
+            image_tag.src = URL.createObjectURL(e.target.files[0])
+        })
+
+        form.addEventListener("submit", e=>{
+            e.preventDefault()
+            //validación para no acumular tensores
+            if(tf.memory().numTensors > 0) tensor.dispose()
+
+            tensor = tf.browser.fromPixels(image_tag)
+
+            options_div.classList.remove("removed")
+
+            tensorsData()
+        })
+
+    </script>
+</body>
+</html>
