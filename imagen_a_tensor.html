@@ -19,7 +19,7 @@
     </form>
     <div id="options_div" class="removed">
         <button>Girar</button>
-        <button>Voltear</button>
+        <button id="flip_btn">Voltear</button>
         <button>Achicar</button>
         <button>Agrandar</button>
     </div>
@@ -34,7 +34,8 @@
         const image_tag = document.getElementById("image_tag")
         const canvas_tag = document.getElementById("canvas_tag")
         const options_div = document.getElementById("options_div")
-        let tensor = undefined
+        const flip_btn = document.getElementById("flip_btn")
+        let tensor
         
 
         const tensorsData = () =>{
@@ -44,20 +45,38 @@
 
         input.addEventListener("change", e=>{
             image_tag.src = URL.createObjectURL(e.target.files[0])
-        })
-
-        form.addEventListener("submit", e=>{
-            e.preventDefault()
             //validación para no acumular tensores
             if(tf.memory().numTensors > 0) tensor.dispose()
 
-            tensor = tf.browser.fromPixels(image_tag)
-
-            options_div.classList.remove("removed")
+            image_tag.classList.remove("removed")
+            canvas_tag.classList.add("removed")
 
             tensorsData()
         })
 
+        form.addEventListener("submit", e=>{
+            e.preventDefault()
+
+            tensor = tf.browser.fromPixels(image_tag)
+
+            options_div.classList.remove("removed")
+            image_tag.classList.add("removed")
+            canvas_tag.classList.remove("removed")
+
+            tf.browser.toPixels(tensor, canvas_tag)
+
+            tensorsData()
+        })
+
+        flip_btn.addEventListener("click", ()=>{
+            const flipped_tensor = tf.reverse(tensor, 1)
+            tensor.dispose()
+            tensor = tf.clone(flipped_tensor)
+            tf.browser.toPixels(tensor, canvas_tag).then(()=>{
+                flipped_tensor.dispose()
+                tensorsData()
+            })
+        })
     </script>
 </body>
 </html>
