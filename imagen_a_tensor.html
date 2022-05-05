@@ -24,10 +24,11 @@
         <button type="submit">Crear tensor</button>
     </form>
     <div id="options_div" class="removed">
-        <button>Girar</button>
-        <button id="flip_btn">Voltear</button>
+        <button id="turn_btn">Voltear</button>
+        <button id="flip_btn">Reflejar</button>
         <button id="reduce_btn">Achicar</button>
-        <button>Agrandar</button>
+        <button id="enlarge_btn">Agrandar</button>
+        <button id="invest_btn">Invertir colores</button>
     </div>
 
     <img src="" alt="" id="image_tag">
@@ -37,17 +38,32 @@
         
         const form = document.forms[0]
         const input = form.elements[0]
+        //tags
         const image_tag = document.getElementById("image_tag")
         const canvas_tag = document.getElementById("canvas_tag")
         const options_div = document.getElementById("options_div")
+        //opt buttons
         const flip_btn = document.getElementById("flip_btn")
         const reduce_btn = document.getElementById("reduce_btn")
-
+        const invest_btn = document.getElementById("invest_btn")
+        const turn_btn = document.getElementById("turn_btn")
+        const enlarge_btn = document.getElementById("enlarge_btn")
+        //global tensor
         let tensor        
 
-        const tensorsData = () =>{
+        const showTensorsData = () =>{
             console.log("Cantidad de tensores: ", tf.memory().numTensors)
             console.log("Memoria usada: ", tf.memory().numBytes, " Bytes")
+        }
+
+        const showTensor = () => tf.browser.toPixels(tensor, canvas_tag)
+
+        //tensor setter
+        const setTensor = (new_tensor) =>{
+            tensor.dispose()
+            tensor = tf.clone(new_tensor)
+            new_tensor.dispose()
+            showTensorsData()
         }
 
         input.addEventListener("change", e=>{
@@ -59,11 +75,13 @@
             canvas_tag.classList.add("removed")
             options_div.classList.add("removed")
 
-            tensorsData()
+            showTensorsData()
         })
 
         form.addEventListener("submit", e=>{
             e.preventDefault()
+
+            if(tf.memory().numTensors > 0) tensor.dispose()
 
             tensor = tf.browser.fromPixels(image_tag)
 
@@ -71,32 +89,45 @@
             image_tag.classList.add("removed")
             canvas_tag.classList.remove("removed")
 
-            tf.browser.toPixels(tensor, canvas_tag)
-
-            tensorsData()
+            showTensor()
+            showTensorsData()
         })
 
+        //reverse
+        //2: Invertir colores
+        //1: Espejo
+        //0: Voltear
+        //-1: Invertir colores
+        //-2: Espejo
         flip_btn.addEventListener("click", ()=>{
-            const flipped_tensor = tf.reverse(tensor, 1)
-            tensor.dispose()
-            tensor = tf.clone(flipped_tensor)
-            tf.browser.toPixels(tensor, canvas_tag).then(()=>{
-                flipped_tensor.dispose()
-                tensorsData()
-            })
+            setTensor(tf.reverse(tensor, 1))
+            showTensor()
         })
 
         reduce_btn.addEventListener("click", ()=>{
-            const reduced_tensor = tf.slice(tensor, [0, 40 ,0], [100, 100, 3])
-            tensor.dispose()
-            tensor = tf.clone(reduced_tensor)
-            tf.browser.toPixels(tensor, canvas_tag).then(()=>{
-                reduced_tensor.dispose()
-                tensorsData()
-            })
+            // setTensor(tf.slice(tensor, [0, 40 ,0], [100, 100, 3]))
+            setTensor(tf.image.resizeBilinear(tensor, [parseInt(image_tag.height / 2), parseInt(image_tag.width / 2)]).toFloat().div(tf.scalar(255)))
+            showTensor()
         })
 
+        invest_btn.addEventListener("click", ()=>{
+            setTensor(tf.reverse(tensor, 2))
+            showTensor()
+        })
 
+        turn_btn.addEventListener("click", ()=>{
+            setTensor(tf.reverse(tensor, 0))
+            showTensor()
+        })
+
+        enlarge_btn.addEventListener("click", ()=>{
+            setTensor(tf.image.resizeBilinear(tensor, [parseInt(image_tag.height * 2), parseInt(image_tag.width * 2)]).toFloat().div(tf.scalar(255)))
+            showTensor()
+        })
+
+        //tf.image.resizeBilinear(image, [alt, anch]).toFloat().div(tf.scalar(255))
+
+        //Vazquez Ramirez Iván Gastón 05-05-2022
     </script>
 </body>
 </html>
