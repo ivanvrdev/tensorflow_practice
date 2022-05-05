@@ -13,6 +13,10 @@
     .removed{
         display: none;
     }
+    #graphic_section{
+        width: 400px;
+        height: 400px;
+    }
 </style>
 <body>
     <section id="loader_section">
@@ -25,19 +29,22 @@
             <textarea name="x_values_input" id="x_values_input" cols="30" rows="10"></textarea>
             <button type="submit">Predecir</button>
         </form>
+        <button id="history_btn">Ver historial</button>
     </section>
     <section id="graphic_section" class="removed">
         <h2>Gráfico</h2>
-        <canvas id="graphic"></canvas>
+        <canvas id="graphic" width="100" height="100"></canvas>
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.js"></script>
     <script>
         //html tags
         const loader_section = document.getElementById("loader_section")
         const form_section = document.getElementById("form_section")
         const graphic_section = document.getElementById("graphic_section")
+        const history_btn = document.getElementById("history_btn")
 
         //Aprendizaje automático
         const model = tf.sequential()
@@ -46,16 +53,21 @@
 
         model.compile({
             loss: "meanSquaredError",
-            optimizer: "sgd"
+            optimizer: "sgd",
+            metrics: ['accuracy']
         })
 
-        const x_examples = tf.tensor2d([3, 12, 5, 1, 7], [5, 1])
-        const y_examples = tf.tensor2d([6, 15, 8, 4, 10], [5, 1])
+        const x_examples = tf.tensor2d([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [10, 1])
+        const y_examples = tf.tensor2d([4, 5, 6, 7, 8, 9, 10, 11, 12, 13], [10, 1])
 
-        
+        const surface = {name: 'Historial', tab: 'Entrenamiento'}
 
-        model.fit(x_examples, y_examples, {epochs: 500})
-        .then(() => {
+        model.fit(x_examples, y_examples, {
+            epochs: 1000,
+            batchSize: 32,
+        })
+        .then(history => {
+            tfvis.show.history(surface, history, ['loss', 'acc'])
             loader_section.classList.add("removed")
             form_section.classList.remove("removed")
             // const x_values = [2, 0, 4, 6]
@@ -132,6 +144,10 @@
                 createGraphic(x_values_int, y_values)
             })
         })
+
+        history_btn.addEventListener("click", () => tfvis.visor().open())
+
+        //Vazquez Ramirez Iván Gastón 04-02-2022
     </script>
 </body>
 </html>

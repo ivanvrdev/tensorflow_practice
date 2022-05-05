@@ -10,6 +10,12 @@
     .removed{
         display: none;
     }
+    div{
+        margin: 10px;
+    }
+    img{
+        margin-top: 5px;
+    }
 </style>
 <body>
     <form action="#" id="upload_image">
@@ -20,7 +26,7 @@
     <div id="options_div" class="removed">
         <button>Girar</button>
         <button id="flip_btn">Voltear</button>
-        <button>Achicar</button>
+        <button id="reduce_btn">Achicar</button>
         <button>Agrandar</button>
     </div>
 
@@ -35,8 +41,9 @@
         const canvas_tag = document.getElementById("canvas_tag")
         const options_div = document.getElementById("options_div")
         const flip_btn = document.getElementById("flip_btn")
-        let tensor
-        
+        const reduce_btn = document.getElementById("reduce_btn")
+
+        let tensor        
 
         const tensorsData = () =>{
             console.log("Cantidad de tensores: ", tf.memory().numTensors)
@@ -50,6 +57,7 @@
 
             image_tag.classList.remove("removed")
             canvas_tag.classList.add("removed")
+            options_div.classList.add("removed")
 
             tensorsData()
         })
@@ -77,6 +85,18 @@
                 tensorsData()
             })
         })
+
+        reduce_btn.addEventListener("click", ()=>{
+            const reduced_tensor = tf.slice(tensor, [0, 40 ,0], [100, 100, 3])
+            tensor.dispose()
+            tensor = tf.clone(reduced_tensor)
+            tf.browser.toPixels(tensor, canvas_tag).then(()=>{
+                reduced_tensor.dispose()
+                tensorsData()
+            })
+        })
+
+
     </script>
 </body>
 </html>

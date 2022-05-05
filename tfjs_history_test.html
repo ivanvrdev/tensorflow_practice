@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script>
+
+        const model = tf.sequential({
+            layers: [
+                tf.layers.dense({inputShape: [784], units: 32, activation: 'relu'}),
+                tf.layers.dense({units: 10, activation: 'softmax'}),
+            ]
+        });
+
+        model.compile({
+        optimizer: 'sgd',
+        loss: 'categoricalCrossentropy',
+        metrics: ['accuracy']
+        });
+
+        const data = tf.randomNormal([100, 784]);
+        const labels = tf.randomUniform([100, 10]);
+
+        // function onBatchEnd(batch, logs) {
+        //     console.log('Accuracy', logs.acc);
+        // }
+
+        const surface = { name: 'show.history', tab: 'Training' };
+        // Train for 5 epochs with batch size of 32.
+        model.fit(data, labels, {
+            epochs: 100,
+            batchSize: 32
+        }).then(history => {
+            tfvis.show.history(surface, history, ['loss', 'acc']);
+        });
+
+    </script>
+</body>
+</html>
