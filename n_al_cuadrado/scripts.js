@@ -4,8 +4,9 @@
 const model = tf.sequential()
 
 model.add(tf.layers.dense({inputShape: [1], units: 1, activation: 'relu'}))
-// model.add(tf.layers.dense({units: 1, activation: 'relu'}))
-// model.add(tf.layers.dense({units: 1, activation: 'relu'}))
+// model.add(tf.layers.dense({units: 2, activation: 'relu'}))
+model.add(tf.layers.dense({units: 5, activation: 'relu'}))
+model.add(tf.layers.dense({units: 1, activation: 'relu' }))
 
 model.compile({
     loss: "meanSquaredError",
@@ -13,13 +14,22 @@ model.compile({
     metrics: ['accuracy']
 })
 
-const exampleY = tf.tensor2d([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [10, 1])
-const exampleX = tf.tensor2d([1, 4, 9, 16, 25, 36, 49, 64, 91, 100], [10, 1])
+let dataX = []
+let dataY = []
+
+for (let index = 0; index < 10; index++) {
+    dataX.push(index)
+    dataY.push(index * index)
+    // dataY.push(Math.pow(index, 2))
+}
+
+const tensorX = tf.tensor2d(dataX, [10, 1])
+const tensorY = tf.tensor2d(dataY, [10, 1])
 
 const surface = {name: 'Historial', tab: 'Entrenamiento'}
 
-model.fit(exampleX, exampleY, {
-    epochs: 1000,
+model.fit(tensorX, tensorY, {
+    epochs: 500,
     batchSize: 32,
 })
 .then(log => {
