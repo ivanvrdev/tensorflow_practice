@@ -1,43 +1,45 @@
-// import * as tf from '/tf.min.js'
-
-//Modelo
-const model = tf.sequential()
-
-model.add(tf.layers.dense({inputShape: [1], units: 1, activation: 'relu'}))
-// model.add(tf.layers.dense({units: 2, activation: 'relu'}))
-model.add(tf.layers.dense({units: 5, activation: 'relu'}))
-model.add(tf.layers.dense({units: 1, activation: 'relu' }))
-
-model.compile({
-    loss: "meanSquaredError",
-    optimizer: "sgd",
-    metrics: ['accuracy']
-})
+// datos
 
 let dataX = []
 let dataY = []
 
-for (let index = 0; index < 10; index++) {
+const dataSize = 10
+const stepSize = 0.001
+
+for (let index = 0; index < dataSize; index+=stepSize) {
     dataX.push(index)
     dataY.push(index * index)
-    // dataY.push(Math.pow(index, 2))
 }
 
-const tensorX = tf.tensor2d(dataX, [10, 1])
-const tensorY = tf.tensor2d(dataY, [10, 1])
+//Modelo
 
-const surface = {name: 'Historial', tab: 'Entrenamiento'}
+const tensorX = tf.tensor(dataX)
+const tensorY = tf.tensor(dataY)
+
+const model = tf.sequential()
+
+// model.add(tf.layers.dense({inputShape: [1], units: 1}))
+model.add(tf.layers.dense({inputShape: [1], units: 20, activation: 'relu'}))
+model.add(tf.layers.dense({units: 1}))
+
+model.compile({
+    loss: "meanSquaredError",
+    optimizer: "adam",
+    metrics: ['accuracy']
+})
+
+const surface = {name: 'Visor', tab: 'Entrenamiento'}
 
 model.fit(tensorX, tensorY, {
-    epochs: 500,
-    batchSize: 32,
+    epochs: 30,
+    batchSize: 64,
+    callbacks: tfvis.show.fitCallbacks(surface, ['loss', 'acc'])
 })
 .then(log => {
-    tfvis.show.history(surface, log, ['loss', 'acc'])
-    tfvis.visor().open()
+    // tfvis.show.history(surface, log, ['loss', 'acc'])
+    // tfvis.visor().open()
     
-    model.predict(tf.tensor2d([2, 4, 6, 8, 10], [5, 1])).print()
-
+    model.predict(tf.tensor([7])).print()
 })
 
 
