@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcial 1</title>
+    <style>
+        *{
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+    <section>
+        <h1>Seminario de actualización - Primer Parcial</h1>
+        <p>Apellido y Nombre: Vazquez Ramirez Iván Gastón</p>
+        <p>DNI: 44558441</p>
+    </section>
+    <section>
+        <h2>Ejercicios: Ver consola</h2>
+        <h2>Teoría</h2>
+        <p>
+            1) El aprendizaje automático consiste que los sistemas aprendan de los datos y mejoren su rendimiento. 
+            La enseñanza implica preparar el entorno para que el sistema aprenda, es decir armar la estructura de la red neuronal, también seleccionar y preparar los datos con los que va a entrenar.
+        </p>
+        <p>
+            2) El tipo de dato del tensor "tf.tensor([1])" es "float32".
+        </p>
+        <p>
+            3) TensorFlow.js tiene acceso por defecto al CPU, a la memoria y al disco para poder trabajar. TensorFlow.js elige el mejor backend según el entorno. Para acceder a la GPU del navegador hay que utilizar WebGL. En Node si carga la librería tensorflow/tfjs-node-gpu,
+            puede acceder a la GPU a través de CUDA.
+        </p>
+    </section>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script>
+
+        //Ejercicios
+        //Regresión lineal
+        const entrenarModelo = () =>{
+            let datosX = []
+            let datosY = []
+    
+            for (let index = 0; index < 10; index++) {
+                datosX.push(index)
+                datosY.push(2*index + 3)
+            }
+            
+            const tensorX = tf.tensor2d(datosX, [10, 1])
+            const tensorY = tf.tensor2d(datosY, [10, 1])
+        
+            const model = tf.sequential()
+        
+            model.add(tf.layers.dense({inputShape: [1], units: 1}))
+        
+            model.compile({
+                loss: "meanSquaredError",
+                optimizer: "sgd",
+                metrics: ['accuracy']
+            })
+        
+            const surface = {name: 'Entrenamiento', tab: 'Modelo de regresión lineal'}
+        
+            model.fit(tensorX, tensorY, {
+                epochs: 100,
+                callbacks: tfvis.show.fitCallbacks(surface, ['loss', 'acc'])
+            })
+            .then(()=>{
+                console.log("Modelo entrenado para regresión lineal")
+                console.log("Fórmula: 2x + 3")
+                console.log("x = 9")
+                console.log("Predicción:")
+                model.predict(tf.tensor1d([9])).print()
+                console.log("x = 7")
+                console.log("Predicción:")
+                model.predict(tf.tensor1d([7])).print()
+                console.log("---------------------")
+            })
+        }
+
+        entrenarModelo()
+
+        //Multiplicación manual
+        const obtenerNumeroRandom = (min, max) =>{
+            return Math.floor(Math.random() * (max - min)) + 1
+        }
+
+        const obtenerMatrizRandom = (filas, columnas) =>{
+            let matriz = []
+
+            //recorre las filas
+            for (let i = 0; i < filas; i++) {
+                let fila = []
+                //rellena cada columna
+                for (let j = 0; j < columnas; j++) {
+                    fila[j] = obtenerNumeroRandom(1, 100)
+                }
+                matriz[i] = fila
+            }
+
+            return matriz
+        }
+        
+        const multiplicarMatrices = (matriz1, matriz2) =>{
+            let matrizProducto = []
+
+            for (let x = 0; x < matriz1.length; x++) {
+                //fila
+                matrizProducto[x] = []
+                for (let y = 0; y < matriz2[0].length; y++) {
+                    //columna
+                    let producto = 0
+                    for (let z = 0; z < matriz1[0].length; z++) {
+                        //recorre los elementos de la fila de la primera matriz y los de la columna de la segunda matriz para multiplicar
+                        producto += matriz1[x][z] * matriz2[z][y]
+                    }
+                    matrizProducto[x][y] = producto
+                }
+            }
+
+            return matrizProducto
+        }
+
+        const matrizA = obtenerMatrizRandom(3, 3)
+        const matrizB = obtenerMatrizRandom(3, 3)
+        const matrizC = multiplicarMatrices(matrizA, matrizB)
+
+        console.log("Multiplicación manual de matrices")
+        console.log("Matriz A")
+        console.log(matrizA)
+        console.log("Matriz B")
+        console.log(matrizB)
+        console.log("Matriz Producto")
+        console.log(matrizC)
+
+        //Multiplicación con tensorflow
+        tf.tidy(() => {
+            const tensorA = tf.tensor(matrizA)
+            const tensorB = tf.tensor(matrizB)
+            const tensorC = tf.matMul(tensorA, tensorB)
+    
+            console.log("Multiplicación de matrices con Tensorflow.js")
+            tensorC.print()
+            console.log("---------------------")
+        })
+        
+    </script>
+</body>
+</html>

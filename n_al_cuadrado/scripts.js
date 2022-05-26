@@ -86,7 +86,7 @@ loadButton.addEventListener("click", async ()=>{
 })
 
 predictButton.addEventListener("click", ()=>{
-    predictSquare(7)
+    predictSquare(3)
 })
 
 // datos
