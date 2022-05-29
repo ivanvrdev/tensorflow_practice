@@ -19,9 +19,9 @@ const trainModel = async () =>{
 
     const model = tf.sequential()
 
-    // model.add(tf.layers.dense({inputShape: [1], units: 1}))
     model.add(tf.layers.dense({inputShape: [1], units: 20, activation: 'relu'}))
-    model.add(tf.layers.dense({inputShape: [1], units: 20, activation: 'relu'}))
+    model.add(tf.layers.dense({units: 20, activation: 'relu'}))
+    model.add(tf.layers.dense({units: 20, activation: 'relu'}))
     model.add(tf.layers.dense({units: 1}))
 
     model.compile({
@@ -32,11 +32,12 @@ const trainModel = async () =>{
 
     const surface = {name: 'Visor', tab: 'Entrenamiento'}
 
-    await model.fit(tensorX, tensorY, {
+    const log = await model.fit(tensorX, tensorY, {
         epochs: 30,
         batchSize: 64,
-        callbacks: tfvis.show.fitCallbacks(surface, ['loss', 'acc'])
+        // callbacks: tfvis.show.fitCallbacks(surface, ['loss', 'acc'])
     })
+    tfvis.show.history(surface, log, ['loss', 'acc'])
 
     return model
 }
@@ -47,46 +48,75 @@ const loadModel = async (path) => {
 }
 
 const saveModel = () =>{
-    model.save('downloads://my-model').then(()=>console.log("Modelo guardado"))
+    model.save('downloads://model-v3').then(()=>console.log("Modelo guardado"))
 }
 
 const predictSquare = (num) =>{
-    model.predict(tf.tensor([num])).print()
+    return model.predict(tf.tensor([num])).arraySync()[0][0]
 }
 
 let model = undefined
 
 //html tags
-const trainButton = document.getElementById("train")
-const saveButton = document.getElementById("save")
-const loadButton = document.getElementById("load")
-const predictButton = document.getElementById("predict")
+//sections
+const preTrainingButtons = document.getElementById("pre-training-buttons")
+const postTrainingButtons = document.getElementById("post-training-buttons")
+const loader = document.getElementById("loader")
+const predictSection = document.getElementById("predict-section")
 
-saveButton.style.display = "none"
-predictButton.style.display = "none"
+//buttons
+const trainButton = document.getElementById("train")
+const loadButton = document.getElementById("load")
+const saveButton = document.getElementById("save")
+// const predictButton = document.getElementById("predict")
+
+//p messages
+const trainingMessage = document.getElementById("training-message")
+const predictMessage = document.getElementById("predict-message")
+
+//form
+const predictForm = document.forms[0]
 
 //events
 trainButton.addEventListener("click", async () =>{
-    loadButton.style.display = "none"
-    trainButton.style.display = "none"
+
+    //ocultar botones de pre-entrenamiento
+    preTrainingButtons.classList.add("removed")
+    //mensaje "entrenando"
+    trainingMessage.innerHTML = "Entrenando..."
+
     model = await trainModel()
-    saveButton.style.display = "block"
-    predictButton.style.display = "block"
+
+    trainingMessage.innerHTML = "Modelo entrenado"
+
+    //mostrar opciones pos-entrenamiento y formulario de predicción
+    postTrainingButtons.classList.remove("removed")
+    predictSection.classList.remove("removed")
 })
 
 saveButton.addEventListener("click", ()=>{
     saveModel()
+    postTrainingButtons.classList.add("removed")
+    trainingMessage.innerHTML = "Modelo guardado"
 })
 
 loadButton.addEventListener("click", async ()=>{
-    trainButton.style.display = "none"
-    loadButton.style.display = "none"
-    model = await loadModel('model/my-model.json')
-    predictButton.style.display = "block"
+
+    preTrainingButtons.classList.add("removed")
+
+    model = await loadModel('model/model-v2.json')
+
+    trainingMessage.innerHTML = "Modelo cargado"
+
+    predictSection.classList.remove("removed")
 })
 
-predictButton.addEventListener("click", ()=>{
-    predictSquare(3)
+predictForm.addEventListener("submit", e => {
+    e.preventDefault()
+
+    const number = e.target.number.value
+    const square =  predictSquare(parseInt(number))
+    predictMessage.innerHTML = `Predicción: ${square}`
 })
 
 // datos

@@ -6,12 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>N al cuadrado</title>
 </head>
+<style>
+    .removed {
+        display: none;
+    }
+</style>
 <body>
-    <section>
-        <button id="train">Entrenar</button>
-        <button id="save">Guardar modelo</button>
-        <button id="load">Cargar modelo</button>
-        <button id="predict">Predecir</button>
+    <h1>N al cuadrado con Tensorflow.js</h1>
+    <section id="training-section">
+        <h2>Entrenamiento del modelo</h2>
+        <p id="training-message"></p>
+        <div id="pre-training-buttons">
+            <button id="train">Entrenar</button>
+            <button id="load">Cargar modelo</button>
+        </div>
+        <div id="post-training-buttons" class="removed">
+            <button id="save">Guardar modelo</button>
+        </div>
+    </section>
+    <section id="predict-section" class="removed">
+        <form action="#">
+            <h2>Predecir cuadrado de N</h2>
+            <label for="number">Ingrese un número</label>
+            <input type="number" name="number" id="number" placeholder="ejemplo: 7">
+            <button type="submit">Predecir</button>
+            <p id="predict-message"></p>
+        </form>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
